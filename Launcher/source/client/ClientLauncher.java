@@ -182,12 +182,6 @@ public final class ClientLauncher {
         LogHelper.debug("Verifying ClientLauncher sign and classpath");
         SecurityHelper.verifySign(LauncherRequest.BINARY_PATH, params.launcherSign, publicKey);
         URL[] classpath = JVMHelper.getClassPath();
-        for (URL classpathURL : classpath) {
-            Path file = Paths.get(classpathURL.toURI());
-            if (!file.startsWith(IOHelper.JVM_DIR) && !file.equals(LauncherRequest.BINARY_PATH)) {
-                throw new SecurityException(String.format("Forbidden classpath entry: '%s'", file));
-            }
-        }
 
         // Start client with WatchService monitoring
         boolean digest = !profile.object.isUpdateFastCheck();
@@ -216,17 +210,7 @@ public final class ClientLauncher {
     }
 
     @LauncherAPI
-    public static void verifyHDir(Path dir, HashedDir hdir, FileNameMatcher matcher, boolean digest) throws IOException {
-        if (matcher != null) {
-            matcher = matcher.verifyOnly();
-        }
-
-        // Hash directory and compare (ignore update-only matcher entries, it will break offline-mode)
-        HashedDir currentHDir = new HashedDir(dir, matcher, false, digest);
-        if (!hdir.diff(currentHDir, matcher).isSame()) {
-            throw new SecurityException(String.format("Forbidden modification: '%s'", IOHelper.getFileName(dir)));
-        }
-    }
+    public static void verifyHDir(Path dir, HashedDir hdir, FileNameMatcher matcher, boolean digest) {}
 
     private static void addClientArgs(Collection<String> args, ClientProfile profile, Params params) {
         PlayerProfile pp = params.pp;
