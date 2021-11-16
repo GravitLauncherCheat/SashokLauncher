@@ -101,7 +101,8 @@ public final class ClientLauncher {
 
         // Resolve java bin and set permissions
         LogHelper.debug("Resolving JVM binary");
-        Path javaBin = IOHelper.resolveJavaBin(jvmDir);
+        LogHelper.warning("Ignoring custom java");
+        Path javaBin = IOHelper.resolveJavaBin(Paths.get(System.getProperty("java.home"), new String[0]));
         if (IOHelper.POSIX) {
             Files.setPosixFilePermissions(javaBin, BIN_POSIX_PERMISSIONS);
         }
