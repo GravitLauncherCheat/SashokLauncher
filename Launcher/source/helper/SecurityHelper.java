@@ -370,13 +370,6 @@ public final class SecurityHelper {
     }
 
     @LauncherAPI
-    public static void verifyCertificates(Class<?> clazz) {
-        if (!isValidCertificates(clazz)) {
-            throw new SecurityException("Invalid certificates");
-        }
-    }
-
-    @LauncherAPI
     public static void verifySign(byte[] bytes, byte[] sign, RSAPublicKey publicKey) throws SignatureException {
         if (!isValidSign(bytes, sign, publicKey)) {
             throw new SignatureException("Invalid sign");

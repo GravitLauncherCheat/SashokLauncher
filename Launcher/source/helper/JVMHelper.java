@@ -123,24 +123,6 @@ public final class JVMHelper {
         return JVM_BITS == OS_BITS;
     }
 
-    @LauncherAPI
-    public static void verifySystemProperties(Class<?> mainClass, boolean requireSystem) {
-        Locale.setDefault(Locale.US);
-
-        // Verify class loader
-        LogHelper.debug("Verifying class loader");
-        if (requireSystem && !mainClass.getClassLoader().equals(LOADER)) {
-            throw new SecurityException("ClassLoader should be system");
-        }
-
-        // Verify system and java architecture
-        LogHelper.debug("Verifying JVM architecture");
-        if (!isJVMMatchesSystemArch()) {
-            LogHelper.warning("Java and OS architecture mismatch");
-            LogHelper.warning("It's recommended to download %d-bit JRE", OS_BITS);
-        }
-    }
-
     @SuppressWarnings("CallToSystemGetenv")
     private static int getCorrectOSArch() {
         // As always, mustdie must die

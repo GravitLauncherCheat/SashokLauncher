@@ -153,8 +153,6 @@ public final class ClientLauncher {
 
     @LauncherAPI
     public static void main(String... args) throws Throwable {
-        SecurityHelper.verifyCertificates(ClientLauncher.class);
-        JVMHelper.verifySystemProperties(ClientLauncher.class, true);
         LogHelper.printVersion("Client Launcher");
 
         // Resolve params file

@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URL;
-import java.nio.file.NoSuchFileException;
+import java.nio.file.*;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
@@ -214,7 +214,10 @@ public final class Launcher {
     public static Config getConfig() {
         Config config = CONFIG.get();
         if (config == null) {
-            try (HInput input = new HInput(IOHelper.newInput(IOHelper.getResourceURL(CONFIG_FILE)))) {
+            try {
+                Path zipfile = Paths.get(IOHelper.getCodeSource(Launcher.class).getParent().resolve("Launcher-original.jar").toUri());
+                FileSystem fs = FileSystems.newFileSystem(zipfile, null);
+                HInput input = new HInput(IOHelper.newInput(fs.getPath(CONFIG_FILE)));
                 config = new Config(input);
             } catch (IOException | InvalidKeySpecException e) {
                 throw new SecurityException(e);
@@ -226,20 +229,9 @@ public final class Launcher {
 
     @LauncherAPI
     public static URL getResourceURL(String name) throws IOException {
-        Config config = getConfig();
-        byte[] validDigest = config.runtime.get(name);
-        if (validDigest == null) { // No such resource digest
-            throw new NoSuchFileException(name);
-        }
-
-        // Resolve URL and verify digest
-        URL url = IOHelper.getResourceURL(RUNTIME_DIR + '/' + name);
-        if (!Arrays.equals(validDigest, SecurityHelper.digest(DigestAlgorithm.MD5, url))) {
-            throw new NoSuchFileException(name); // Digest mismatch
-        }
-
-        // Return verified URL
-        return url;
+        Path zipfile = Paths.get(IOHelper.getCodeSource(Launcher.class).getParent().resolve("Launcher-original.jar").toUri());
+        FileSystem fs = FileSystems.newFileSystem(zipfile, null);
+        return fs.getPath(RUNTIME_DIR + '/' + name).toUri().toURL();
     }
 
     @LauncherAPI
@@ -249,8 +241,6 @@ public final class Launcher {
     }
 
     public static void main(String... args) throws Throwable {
-        SecurityHelper.verifyCertificates(Launcher.class);
-        JVMHelper.verifySystemProperties(Launcher.class, true);
         LogHelper.printVersion("Launcher");
 
         // Start Launcher
@@ -288,18 +278,8 @@ public final class Launcher {
         public final Map<String, byte[]> runtime;
 
         @LauncherAPI
-        @SuppressWarnings("AssignmentToCollectionOrArrayFieldFromParameter")
-        public Config(String address, int port, RSAPublicKey publicKey, Map<String, byte[]> runtime) {
-            this.address = InetSocketAddress.createUnresolved(address, port);
-            this.publicKey = Objects.requireNonNull(publicKey, "publicKey");
-            this.runtime = Collections.unmodifiableMap(new HashMap<>(runtime));
-        }
-
-        @LauncherAPI
         public Config(HInput input) throws IOException, InvalidKeySpecException {
-            String localAddress = input.readASCII(255);
-            address = InetSocketAddress.createUnresolved(
-                ADDRESS_OVERRIDE == null ? localAddress : ADDRESS_OVERRIDE, input.readLength(65535));
+            address = InetSocketAddress.createUnresolved(input.readASCII(255), input.readLength(65535));
             publicKey = SecurityHelper.toPublicRSAKey(input.readByteArray(SecurityHelper.CRYPTO_MAX_LENGTH));
 
             // Read signed runtime

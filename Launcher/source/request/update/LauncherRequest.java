@@ -24,7 +24,7 @@ import launcher.serialize.HOutput;
 import launcher.serialize.signed.SignedObjectHolder;
 
 public final class LauncherRequest extends Request<Result> {
-    @LauncherAPI public static final Path BINARY_PATH = IOHelper.getCodeSource(Launcher.class);
+    @LauncherAPI public static final Path BINARY_PATH = IOHelper.getCodeSource(Launcher.class).getParent().resolve("Launcher-original.jar");
     @LauncherAPI public static final boolean EXE_BINARY = IOHelper.hasExtension(BINARY_PATH, "exe");
 
     @LauncherAPI
@@ -75,31 +75,7 @@ public final class LauncherRequest extends Request<Result> {
     }
 
     @LauncherAPI
-    public static void update(Config config, Result result) throws SignatureException, IOException {
-        SecurityHelper.verifySign(result.binary, result.sign, config.publicKey);
-
-        // Prepare process builder to start new instance (java -jar works for Launch4J's EXE too)
-        List<String> args = new ArrayList<>(8);
-        args.add(IOHelper.resolveJavaBin(null).toString());
-        if (LogHelper.isDebugEnabled()) {
-            args.add(ClientLauncher.jvmProperty(LogHelper.DEBUG_PROPERTY, Boolean.toString(LogHelper.isDebugEnabled())));
-        }
-        if (Config.ADDRESS_OVERRIDE != null) {
-            args.add(ClientLauncher.jvmProperty(Config.ADDRESS_OVERRIDE_PROPERTY, Config.ADDRESS_OVERRIDE));
-        }
-        args.add("-jar");
-        args.add(BINARY_PATH.toString());
-        ProcessBuilder builder = new ProcessBuilder(args.toArray(new String[args.size()]));
-        builder.inheritIO();
-
-        // Rewrite and start new instance
-        IOHelper.write(BINARY_PATH, result.binary);
-        builder.start();
-
-        // Kill current instance
-        JVMHelper.RUNTIME.exit(255);
-        throw new AssertionError("Why Launcher wasn't restarted?!");
-    }
+    public static void update(Config config, Result result) throws SignatureException, IOException {}
 
     public static final class Result {
         @LauncherAPI public final List<SignedObjectHolder<ClientProfile>> profiles;
