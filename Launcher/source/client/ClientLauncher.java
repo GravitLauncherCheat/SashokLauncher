@@ -127,7 +127,7 @@ public final class ClientLauncher {
 
         // Add classpath and main class
         Collections.addAll(args, profile.object.getJvmArgs());
-        Collections.addAll(args, "-classpath", IOHelper.getCodeSource(ClientLauncher.class).toString(), ClientLauncher.class.getName());
+        Collections.addAll(args, "-classpath", IOHelper.getCodeSource(ClientLauncher.class).toString(), ClientLauncher.class.getName(), IOHelper.getCodeSource(ClientLauncher.class).getParent().getParent().resolve("liteloader-" + profile.object.getVersion() + ".jar").toString().replace("Minecraft ", ""));
         args.add(paramsFile.toString()); // Add params file path to args
 
         // Print commandline debug message
@@ -160,6 +160,7 @@ public final class ClientLauncher {
         VerifyHelper.verifyInt(args.length, l -> l >= 1, "Missing args: <paramsFile>");
         Path paramsFile = IOHelper.toPath(args[0]);
 
+
         // Read and delete params file
         LogHelper.debug("Reading ClientLauncher params file");
         Params params;
@@ -182,7 +183,6 @@ public final class ClientLauncher {
         LogHelper.debug("Verifying ClientLauncher sign and classpath");
         SecurityHelper.verifySign(LauncherRequest.BINARY_PATH, params.launcherSign, publicKey);
         URL[] classpath = JVMHelper.getClassPath();
-
         // Start client with WatchService monitoring
         boolean digest = !profile.object.isUpdateFastCheck();
         LogHelper.debug("Starting JVM and client WatchService");
@@ -267,6 +267,7 @@ public final class ClientLauncher {
             Collections.addAll(args, "--width", Integer.toString(params.width));
             Collections.addAll(args, "--height", Integer.toString(params.height));
         }
+        Collections.addAll(args, "--tweakClass", "com.mumfrey.liteloader.launch.LiteLoaderTweaker");
     }
 
     private static void addClientLegacyArgs(Collection<String> args, ClientProfile profile, Params params) {
