@@ -1,12 +1,27 @@
-# sashok724's Launcher v3
+# Чит для проектов с лаунчером [SashokLauncher](https://launcher.sashok724.net/)
 
-Сайт с инструкцией: https://launcher.sashok724.net/
+Текущие функции:
+  - Вырезано авто обновление
+  - Вырезана проверка клиентов
+  - Добавлен загрузчик liteloader
 
-(2021-05-01) У меня больше нет времени поддерживать лаунчер, поэтому оставлю ссылки на форки которые ещё развиваются:
 
-| Название | Функционал | Качество кода | Качество документации | Сложность установки | Ссылка |
-|----------|------------|---------------|-----------------------|---------------------|--------|
-| KeeperJerry Launcher | Средний | Хорошее | Пойдёт | Такая же | https://launcher-sashok724.keeperjerry.ru/ |
-| Gravit Launcher | Большой | Ужасное | Пойдёт | Сложнее | https://launcher.gravit.pro/ |
+Информация:
+  - Чит сам подтягивает папку оригинального лаунчера в `%APPDATA%`
+ 
 
-Если есть ещё популярные форки, пишите в ВК, добавлю со своей личной оценкой: https://vk.com/sashok724
+При возникновении ошибок:
+  - Запустите лаунчер через `java -Dlauncher.debug=true -jar Launcher.jar`
+
+
+Туториал:
+  - Скачайте чит в [releases](https://github.com/GravitLauncherCheat/SashokLauncher/releases) или в [actions](https://github.com/GravitLauncherCheat/SashokLauncher/actions) (не стабильные)
+  - Положите рядом с читом оригинальный лаунчер и переименуйте в `Launcher-original.jar`
+  - Запустите лаунчер
+
+
+Загрузка liteloader:
+  - Скачайте liteloader от сюда
+  - Запустите установщик и выберите "Extract liteloader.jar"
+  - Переименнуйте в LiteLoader-<версия mc>.jar
+  - Положите рядом с читом
