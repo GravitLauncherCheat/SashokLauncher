@@ -1,5 +1,7 @@
 # Чит для проектов с лаунчером [SashokLauncher](https://launcher.sashok724.net/)
 
+# С этим лаунчером работает [KeeperJerryLauncher](https://github.com/GravitLauncherCheat/KeeperJerryLauncher), этот безсмысленно использовать!
+
 Текущие функции:
   - Вырезано авто обновление
   - Вырезана проверка клиентов
