@@ -1,4 +1,5 @@
+.idea/
+.gradle/
+build/
 Launcher.jar
-LauncherAuthlib.jar
-LaunchServer.jar
 Launcher-original.jar
