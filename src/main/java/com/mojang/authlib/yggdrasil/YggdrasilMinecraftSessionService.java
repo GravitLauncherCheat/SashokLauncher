@@ -130,10 +130,6 @@ public class YggdrasilMinecraftSessionService extends BaseMinecraftSessionServic
 
     @Override
     public void joinServer(GameProfile profile, String accessToken, String serverID) throws AuthenticationException {
-        if (!ClientLauncher.isLaunched()) {
-            throw new AuthenticationException("Bad Login (Cheater)");
-        }
-
         // Join server
         String username = profile.getName();
         LogHelper.debug("joinServer, Username: '%s', Access token: %s, Server ID: %s", username, accessToken, serverID);

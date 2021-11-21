@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 import com.eclipsesource.json.Json;
@@ -31,17 +30,12 @@ import launcher.Launcher;
 import launcher.Launcher.Config;
 import launcher.LauncherAPI;
 import launcher.client.ClientProfile.Version;
-import launcher.hasher.DirWatcher;
-import launcher.hasher.FileNameMatcher;
 import launcher.hasher.HashedDir;
-import launcher.helper.CommonHelper;
 import launcher.helper.IOHelper;
 import launcher.helper.JVMHelper;
 import launcher.helper.JVMHelper.OS;
 import launcher.helper.LogHelper;
 import launcher.helper.SecurityHelper;
-import launcher.helper.VerifyHelper;
-import launcher.request.update.LauncherRequest;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
 import launcher.serialize.signed.SignedObjectHolder;
@@ -67,16 +61,8 @@ public final class ClientLauncher {
     @LauncherAPI public static final String CLOAK_URL_PROPERTY = "cloakURL";
     @LauncherAPI public static final String CLOAK_DIGEST_PROPERTY = "cloakDigest";
 
-    // Used to determine from clientside is launched from launcher
-    private static final AtomicBoolean LAUNCHED = new AtomicBoolean(false);
 
-    private ClientLauncher() {
-    }
-
-    @LauncherAPI
-    public static boolean isLaunched() {
-        return LAUNCHED.get();
-    }
+    private ClientLauncher() {}
 
     public static String jvmProperty(String name, String value) {
         return String.format("-D%s=%s", name, value);
@@ -157,60 +143,29 @@ public final class ClientLauncher {
         LogHelper.printVersion("Client Launcher");
 
         // Resolve params file
-        VerifyHelper.verifyInt(args.length, l -> l >= 1, "Missing args: <paramsFile>");
         Path paramsFile = IOHelper.toPath(args[0]);
-
 
         // Read and delete params file
         LogHelper.debug("Reading ClientLauncher params file");
         Params params;
         SignedObjectHolder<ClientProfile> profile;
-        SignedObjectHolder<HashedDir> jvmHDir, assetHDir, clientHDir;
         RSAPublicKey publicKey = Launcher.getConfig().publicKey;
         try (HInput input = new HInput(IOHelper.newInput(paramsFile))) {
             params = new Params(input);
             profile = new SignedObjectHolder<>(input, publicKey, ClientProfile.RO_ADAPTER);
-
-            // Read hdirs
-            jvmHDir = new SignedObjectHolder<>(input, publicKey, HashedDir::new);
-            assetHDir = new SignedObjectHolder<>(input, publicKey, HashedDir::new);
-            clientHDir = new SignedObjectHolder<>(input, publicKey, HashedDir::new);
         } finally {
             Files.delete(paramsFile);
         }
 
-        // Verify ClientLauncher sign and classpath
-        LogHelper.debug("Verifying ClientLauncher sign and classpath");
-        SecurityHelper.verifySign(LauncherRequest.BINARY_PATH, params.launcherSign, publicKey);
-        URL[] classpath = JVMHelper.getClassPath();
-        // Start client with WatchService monitoring
-        boolean digest = !profile.object.isUpdateFastCheck();
-        LogHelper.debug("Starting JVM and client WatchService");
-        FileNameMatcher assetMatcher = profile.object.getAssetUpdateMatcher();
-        FileNameMatcher clientMatcher = profile.object.getClientUpdateMatcher();
-        try (DirWatcher jvmWatcher = new DirWatcher(IOHelper.JVM_DIR, jvmHDir.object, null, digest); // JVM Watcher
-            DirWatcher assetWatcher = new DirWatcher(params.assetDir, assetHDir.object, assetMatcher, digest);
-            DirWatcher clientWatcher = new DirWatcher(params.clientDir, clientHDir.object, clientMatcher, digest)) {
-            // Verify current state of all dirs
-            verifyHDir(IOHelper.JVM_DIR, jvmHDir.object, null, digest);
-            verifyHDir(params.assetDir, assetHDir.object, assetMatcher, digest);
-            verifyHDir(params.clientDir, clientHDir.object, clientMatcher, digest);
 
-            // Start WatchService, and only then client
-            CommonHelper.newThread("JVM Directory Watcher", true, jvmWatcher).start();
-            CommonHelper.newThread("Asset Directory Watcher", true, assetWatcher).start();
-            CommonHelper.newThread("Client Directory Watcher", true, clientWatcher).start();
-            launch(profile.object, params);
-        }
+        LogHelper.debug("Starting JVM");
+        launch(profile.object, params);
     }
 
     @LauncherAPI
     public static String toHash(UUID uuid) {
         return UUID_PATTERN.matcher(uuid.toString()).replaceAll("");
     }
-
-    @LauncherAPI
-    public static void verifyHDir(Path dir, HashedDir hdir, FileNameMatcher matcher, boolean digest) {}
 
     private static void addClientArgs(Collection<String> args, ClientProfile profile, Params params) {
         PlayerProfile pp = params.pp;
@@ -305,7 +260,6 @@ public final class ClientLauncher {
             .asFixedArity();
 
         // Invoke main method with exception wrapping
-        LAUNCHED.set(true);
         JVMHelper.fullGC();
         System.setProperty("minecraft.launcher.brand", "sashok724's Launcher v3");
         System.setProperty("minecraft.launcher.version", Launcher.VERSION);

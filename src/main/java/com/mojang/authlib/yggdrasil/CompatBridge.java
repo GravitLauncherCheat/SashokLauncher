@@ -3,7 +3,6 @@ package com.mojang.authlib.yggdrasil;
 import java.util.UUID;
 
 import launcher.LauncherAPI;
-import launcher.client.ClientLauncher;
 import launcher.client.PlayerProfile;
 import launcher.helper.LogHelper;
 import launcher.request.auth.CheckServerRequest;
@@ -15,10 +14,7 @@ import launcher.request.uuid.ProfileByUsernameRequest;
 // Used to bypass Launcher's class name obfuscation and access API
 @LauncherAPI
 public final class CompatBridge {
-    public static final int PROFILES_MAX_BATCH_SIZE = BatchProfileByUsernameRequest.MAX_BATCH_SIZE;
-
-    private CompatBridge() {
-    }
+    private CompatBridge() {}
 
     @SuppressWarnings("unused")
     public static CompatProfile checkServer(String username, String serverID) throws Throwable {
@@ -28,10 +24,6 @@ public final class CompatBridge {
 
     @SuppressWarnings("unused")
     public static boolean joinServer(String username, String accessToken, String serverID) throws Throwable {
-        if (!ClientLauncher.isLaunched()) {
-            throw new IllegalStateException("Bad Login (Cheater)");
-        }
-
         // Join server
         LogHelper.debug("LegacyBridge.joinServer, Username: '%s', Access token: %s, Server ID: %s", username, accessToken, serverID);
         return new JoinServerRequest(username, accessToken, serverID).request();
