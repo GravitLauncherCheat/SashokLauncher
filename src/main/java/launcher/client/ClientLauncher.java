@@ -61,6 +61,7 @@ public final class ClientLauncher {
     @LauncherAPI public static final String CLOAK_URL_PROPERTY = "cloakURL";
     @LauncherAPI public static final String CLOAK_DIGEST_PROPERTY = "cloakDigest";
 
+    private static Path loaderPath;
 
     private ClientLauncher() {}
 
@@ -157,6 +158,7 @@ public final class ClientLauncher {
             Files.delete(paramsFile);
         }
 
+        loaderPath = IOHelper.getCodeSource(ClientLauncher.class).getParent().resolve("liteloader-" + profile.object.getVersion().toString().replace("Minecraft ", "") + ".jar");
 
         LogHelper.debug("Starting JVM");
         launch(profile.object, params);
@@ -222,6 +224,9 @@ public final class ClientLauncher {
             Collections.addAll(args, "--width", Integer.toString(params.width));
             Collections.addAll(args, "--height", Integer.toString(params.height));
         }
+        if (loaderPath.toFile().exists()) {
+            Collections.addAll(args, "--tweakClass", "com.mumfrey.liteloader.launch.LiteLoaderTweaker");
+        }
     }
 
     private static void addClientLegacyArgs(Collection<String> args, ClientProfile profile, Params params) {
@@ -252,6 +257,10 @@ public final class ClientLauncher {
         URL[] classPath = resolveClassPath(params.clientDir, profile.getClassPath());
         for (URL url : classPath) {
             JVMHelper.addClassPath(url);
+        }
+        
+        if (loaderPath.toFile().exists()) {
+            JVMHelper.addClassPath(loaderPath.toUri().toURL());
         }
 
         // Resolve main class and method
