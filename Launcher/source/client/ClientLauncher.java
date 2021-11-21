@@ -127,7 +127,7 @@ public final class ClientLauncher {
 
         // Add classpath and main class
         Collections.addAll(args, profile.object.getJvmArgs());
-        Collections.addAll(args, "-classpath", IOHelper.getCodeSource(ClientLauncher.class).toString(), ClientLauncher.class.getName(), IOHelper.getCodeSource(ClientLauncher.class).getParent().getParent().resolve("liteloader-" + profile.object.getVersion() + ".jar").toString().replace("Minecraft ", ""));
+        Collections.addAll(args, "-classpath", IOHelper.getCodeSource(ClientLauncher.class).toString(), ClientLauncher.class.getName());
         args.add(paramsFile.toString()); // Add params file path to args
 
         // Print commandline debug message
@@ -267,7 +267,6 @@ public final class ClientLauncher {
             Collections.addAll(args, "--width", Integer.toString(params.width));
             Collections.addAll(args, "--height", Integer.toString(params.height));
         }
-        Collections.addAll(args, "--tweakClass", "com.mumfrey.liteloader.launch.LiteLoaderTweaker");
     }
 
     private static void addClientLegacyArgs(Collection<String> args, ClientProfile profile, Params params) {
