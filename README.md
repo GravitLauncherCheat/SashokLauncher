@@ -27,4 +27,4 @@
   - Положите рядом с `Launcher-original.jar`
 
 
-# На проектах с лаунчером [KeeperJerryLauncher](https://github.com/GravitLauncherCheat/KeeperJerryLauncher) так же может работать
+### На проектах с лаунчером [KeeperJerryLauncher](https://github.com/GravitLauncherCheat/KeeperJerryLauncher) так же может работать
